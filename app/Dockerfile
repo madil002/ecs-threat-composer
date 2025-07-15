@@ -26,8 +26,17 @@ RUN yarn global add serve
 # Copy the built files from the build stage
 COPY --from=build /app/build ./build
 
+# Create a non-root user and group
+RUN addgroup -S appgroup && adduser -S user -G appgroup
+
+# Change ownership of the app directory to the non-root user
+RUN chown -R user:appgroup /app
+
 # Open port 3000
 EXPOSE 3000
+
+# Switch to the non-root user
+USER user 
 
 # Serve the built app
 CMD ["serve", "-s", "build"]
