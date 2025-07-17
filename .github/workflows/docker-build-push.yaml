@@ -3,6 +3,9 @@ name: Docker build and push
 on:
   workflow_dispatch:
 
+permissions:
+      security-events: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,5 +26,19 @@ jobs:
           docker build -t ecs-threat-app ./app
           docker tag ecs-threat-app:latest ${{ secrets.AWS_REPOSITORY }}/ecs-threat-app:latest
 
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with: 
+          image-ref: '${{ secrets.AWS_REPOSITORY }}/ecs-threat-app:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+          wait-for-processing: true
+      
       - name: Push to ECR
         run: docker push ${{ secrets.AWS_REPOSITORY }}/ecs-threat-app:latest
