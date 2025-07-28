@@ -3,7 +3,7 @@ resource "aws_lb_target_group" "main" {
   port        = 3000
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = module.vpc.vpc_id
 
   health_check {
     enabled             = true
@@ -27,7 +27,7 @@ resource "aws_lb" "main" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
+  subnets            = [module.vpc.subnet1_id, module.vpc.subnet2_id]
   #   enable_deletion_protection = true
 
   tags = {
@@ -66,7 +66,7 @@ resource "aws_lb_listener" "https" {
 
 resource "aws_security_group" "alb_sg" {
   name   = "ALB-sg"
-  vpc_id = aws_vpc.main.id
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     from_port   = 80

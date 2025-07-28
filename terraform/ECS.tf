@@ -36,7 +36,7 @@ resource "aws_ecs_service" "threat_app" {
   network_configuration {
     assign_public_ip = true
     security_groups  = [aws_security_group.task_sg.id]
-    subnets          = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
+    subnets          = [module.vpc.subnet1_id, module.vpc.subnet2_id]
   }
 
   load_balancer {
@@ -48,7 +48,7 @@ resource "aws_ecs_service" "threat_app" {
 
 resource "aws_security_group" "task_sg" {
   name   = "ECS-task-sg"
-  vpc_id = aws_vpc.main.id
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     description     = "Allow HTTP"
