@@ -33,3 +33,10 @@ module "ecs" {
   ecs_egress_cidr_blocks            = ["0.0.0.0/0"]
   ecs_task_execution_role_name      = "ecs"
 }
+
+module "route53" {
+  source      = "./modules/route53"
+  domain_name = "app.madil.co.uk"
+  lb_dns_name = aws_lb.main.dns_name
+  lb_zone_id  = aws_lb.main.zone_id
+}
