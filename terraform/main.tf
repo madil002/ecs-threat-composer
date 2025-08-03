@@ -40,3 +40,11 @@ module "route53" {
   lb_dns_name = aws_lb.main.dns_name
   lb_zone_id  = aws_lb.main.zone_id
 }
+
+module "acm" {
+  source                 = "./modules/acm"
+  domain_name            = "app.madil.co.uk"
+  validation_method      = "DNS"
+  route53_domain_zone_id = module.route53.domain_zone_id
+  dns_ttl                = 60
+}
