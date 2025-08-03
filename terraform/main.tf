@@ -1,68 +1,68 @@
 module "vpc" {
   source       = "./modules/vpc"
-  vpc_cidr     = "10.0.0.0/16"
-  vpc_tags     = { Name = "Main VPC" }
-  subnet1_tags = { Name = "Subnet 1" }
-  subnet2_tags = { Name = "Subnet 2" }
+  vpc_cidr     = var.vpc_cidr
+  vpc_tags     = var.vpc_tags
+  subnet1_tags = var.subnet1_tags
+  subnet2_tags = var.subnet2_tags
 }
 
 module "ecs" {
   source                            = "./modules/ecs"
-  ecs_cluster_name                  = "white-hart"
-  ecs_task_family                   = "threat-app"
-  ecs_task_requires_compatibilities = ["FARGATE"]
-  ecs_task_network_mode             = "awsvpc"
-  ecs_task_cpu                      = "1024"
-  ecs_task_memory                   = "2048"
-  ecs_container_name                = "threat-app"
-  ecs_container_image               = "418272778807.dkr.ecr.eu-west-2.amazonaws.com/ecs-threat-app:latest"
-  ecs_container_containerport       = 3000
-  ecs_container_hostport            = 3000
-  ecs_service_name                  = "threat-app"
-  ecs_service_desired_count         = 1
-  ecs_service_launch_type           = "FARGATE"
+  ecs_cluster_name                  = var.ecs_cluster_name
+  ecs_task_family                   = var.ecs_task_family
+  ecs_task_requires_compatibilities = var.ecs_task_requires_compatibilities
+  ecs_task_network_mode             = var.ecs_task_network_mode
+  ecs_task_cpu                      = var.ecs_task_cpu
+  ecs_task_memory                   = var.ecs_task_memory
+  ecs_container_name                = var.ecs_container_name
+  ecs_container_image               = var.ecs_container_image
+  ecs_container_containerport       = var.ecs_container_containerport
+  ecs_container_hostport            = var.ecs_container_hostport
+  ecs_service_name                  = var.ecs_service_name
+  ecs_service_desired_count         = var.ecs_service_desired_count
+  ecs_service_launch_type           = var.ecs_service_launch_type
   ecs_service_subnet_ids            = [module.vpc.subnet1_id, module.vpc.subnet2_id]
   ecs_lb_target_group_arn           = module.alb.lb_target_group_arn
-  ecs_lb_container_name             = "threat-app"
-  ecs_lb_container_port             = 3000
-  task_sg_name                      = "ECS-task-sg"
+  ecs_lb_container_name             = var.ecs_lb_container_name
+  ecs_lb_container_port             = var.ecs_lb_container_port
+  task_sg_name                      = var.task_sg_name
   vpc_id                            = module.vpc.vpc_id
-  ecs_ingress_from_port             = 3000
-  ecs_ingress_to_port               = 3000
+  ecs_ingress_from_port             = var.ecs_ingress_from_port
+  ecs_ingress_to_port               = var.ecs_ingress_to_port
   ecs_ingress_sg_ids                = [module.alb.lb_sg_id]
-  ecs_egress_cidr_blocks            = ["0.0.0.0/0"]
-  ecs_task_execution_role_name      = "ecs"
+  ecs_egress_cidr_blocks            = var.ecs_egress_cidr_blocks
+  ecs_task_execution_role_name      = var.ecs_task_execution_role_name
 }
 
 module "route53" {
   source      = "./modules/route53"
-  domain_name = "app.madil.co.uk"
+  domain_name = var.domain_name
   lb_dns_name = module.alb.lb_dns_name
   lb_zone_id  = module.alb.lb_zone_id
 }
 
 module "acm" {
   source                 = "./modules/acm"
-  domain_name            = "app.madil.co.uk"
-  validation_method      = "DNS"
+  domain_name            = var.domain_name
+  validation_method      = var.validation_method
   route53_domain_zone_id = module.route53.domain_zone_id
-  dns_ttl                = 60
+  dns_ttl                = var.dns_ttl
 }
 
 
 module "alb" {
   source                = "./modules/alb"
-  target_group_name     = "ecs-service-tasks"
-  target_group_port     = 3000
-  target_group_protocol = "HTTP"
+  target_group_name     = var.target_group_name
+  target_group_port     = var.target_group_port
+  target_group_protocol = var.target_group_protocol
   vpc_id                = module.vpc.vpc_id
-  target_group_tags     = { Name = "ecs-service-tasks" }
-  lb_name               = "ECS-alb"
-  internal              = false
-  load_balancer_type    = "application"
+  target_group_tags     = var.target_group_tags
+  lb_name               = var.lb_name
+  internal              = var.internal
+  load_balancer_type    = var.lb_type
   subnet_ids            = [module.vpc.subnet1_id, module.vpc.subnet2_id]
-  deletion_protection   = false
-  lb_tags               = { Name = "ECS-alb" }
+  deletion_protection   = var.deletion_protection
+  lb_tags               = var.lb_tags
   certificate_arn       = module.acm.cert_arn
-  sg_name               = "ALB-sg"
+  sg_name               = var.lb_sg_name
 }
