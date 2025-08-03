@@ -22,14 +22,14 @@ module "ecs" {
   ecs_service_desired_count         = 1
   ecs_service_launch_type           = "FARGATE"
   ecs_service_subnet_ids            = [module.vpc.subnet1_id, module.vpc.subnet2_id]
-  ecs_lb_target_group_arn           = aws_lb_target_group.main.arn
+  ecs_lb_target_group_arn           = module.alb.lb_target_group_arn
   ecs_lb_container_name             = "threat-app"
   ecs_lb_container_port             = 3000
   task_sg_name                      = "ECS-task-sg"
   vpc_id                            = module.vpc.vpc_id
   ecs_ingress_from_port             = 3000
   ecs_ingress_to_port               = 3000
-  ecs_ingress_sg_ids                = [aws_security_group.alb_sg.id]
+  ecs_ingress_sg_ids                = [module.alb.lb_sg_id]
   ecs_egress_cidr_blocks            = ["0.0.0.0/0"]
   ecs_task_execution_role_name      = "ecs"
 }
@@ -37,8 +37,8 @@ module "ecs" {
 module "route53" {
   source      = "./modules/route53"
   domain_name = "app.madil.co.uk"
-  lb_dns_name = aws_lb.main.dns_name
-  lb_zone_id  = aws_lb.main.zone_id
+  lb_dns_name = module.alb.lb_dns_name
+  lb_zone_id  = module.alb.lb_zone_id
 }
 
 module "acm" {
@@ -47,4 +47,22 @@ module "acm" {
   validation_method      = "DNS"
   route53_domain_zone_id = module.route53.domain_zone_id
   dns_ttl                = 60
+}
+
+
+module "alb" {
+  source                = "./modules/alb"
+  target_group_name     = "ecs-service-tasks"
+  target_group_port     = 3000
+  target_group_protocol = "HTTP"
+  vpc_id                = module.vpc.vpc_id
+  target_group_tags     = { Name = "ecs-service-tasks" }
+  lb_name               = "ECS-alb"
+  internal              = false
+  load_balancer_type    = "application"
+  subnet_ids            = [module.vpc.subnet1_id, module.vpc.subnet2_id]
+  deletion_protection   = false
+  lb_tags               = { Name = "ECS-alb" }
+  certificate_arn       = module.acm.cert_arn
+  sg_name               = "ALB-sg"
 }
