@@ -61,8 +61,9 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_security_group" "alb_sg" {
-  name   = var.sg_name
-  vpc_id = var.vpc_id
+  name        = var.sg_name
+  vpc_id      = var.vpc_id
+  description = "SG for ALB"
 
   ingress {
     from_port   = 80

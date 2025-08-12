@@ -46,8 +46,9 @@ resource "aws_ecs_service" "threat_app" {
 }
 
 resource "aws_security_group" "task_sg" {
-  name   = var.task_sg_name
-  vpc_id = var.vpc_id
+  name        = var.task_sg_name
+  vpc_id      = var.vpc_id
+  description = "SG for ECS service"
 
   ingress {
     from_port       = var.ecs_ingress_from_port
