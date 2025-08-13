@@ -2,6 +2,13 @@
 
 ## Project Overview
 
+## 🏗️ Architecture Diagram:
+
+<p align="center">
+  <img src="images/ecs.gif" alt="architechtural diagram" style="width:700px"/>
+</p>
+
+
 ## 📁 Project Structure
 ```
 └── ECS-THREAT-COMPOSER
@@ -13,7 +20,7 @@
     │    ├── provider.tf
     │    ├── variables.tf
     │    ├── terraform.tfvars
-    │    ├── modules/
+    │    └── modules/
     │        ├── acm/
     │        ├── alb/
     │        ├── ecs/
