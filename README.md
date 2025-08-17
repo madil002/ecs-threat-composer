@@ -34,3 +34,31 @@ The solution provisions a secure and scalable cloud environment, including **VPC
            ├── terraform-destroy.yaml
            └── terraform-plan.yaml
 ```
+
+## ✨ Key Features
+### 📊 Threat Composer Application
+- **Amazon Threat Composer**: Deploys the open-source threat modeling tool in a containerised environment
+- **Browser-Based Access**: Accessible via HTTPS with a custom Route 53 domain
+- **Dockerised Deployment**: Application container built, pushed, and run on ECS Fargate
+- **Ready-to-Use Setup**: No manual installation — app is live after pipeline execution
+
+### 🚀 Infrastructure Automation
+- **Terraform Modules**: Modular design for VPC, ECS, ALB, Route 53, and ACM
+- **GitHub Actions Pipelines**: Automated workflows for Docker build/push, Terraform plan/apply/destroy
+- **ECR Integration**: Docker images built and pushed directly into Amazon ECR
+- **Scalable ECS Fargate**: Serverless compute with task definition and service management
+- **Automated DNS & SSL**: Route 53 records and ACM certificates provisioned automatically
+
+### 🔐 Security & Compliance
+- **ACM-Managed TLS**: Encrypted HTTPS connections via Application Load Balancer
+- **Network Isolation**: Security groups restrict access to only necessary traffic (ALB ↔ ECS)
+- **IAM Roles & Policies**: Fine grained AWS permissions for ECS tasks and pipelines
+- **Pre-Commit Hooks**: Enforces linting and formatting before committing changes
+- **Checkov Integration**: Infrastructure code scanning for misconfigurations
+
+### 📈 Monitoring & Reliability
+
+- **ALB Health Checks**: Continuous monitoring of ECS task health via load balancer
+- **ECS Service Insights**: Built in metrics for CPU, memory, and scaling behavior
+- **Centralised Logging**: ECS, ALB, and VPC logs available in CloudWatch
+- **High Availability**: Multi-AZ deployment with load-balanced traffic distribution
