@@ -152,3 +152,11 @@ To maintain code quality and consistency, this project uses **pre-commit hooks**
   - Normalises line endings to LF.
 - **YAML Linting** (`yamllint`)
   - Ensures GitHub Actions workflows and other YAML files follow proper formatting and indentation.
+#
+## 🖼️ Visual Reference
+<p align="center">
+  <img src="images/threat-app.png" alt="architechtural diagram" style="width:700px"/>
+</p>
+<p align="center">
+  <img src="images/pipelines.png" alt="architechtural diagram" style="width:700px"/>
+</p>
