@@ -80,3 +80,23 @@ The application container is built from the `app/` directory and managed via a G
 - name: Run Trivy vulnerability scanner
   uses: aquasecurity/trivy-action@0.28.0
 ```
+### 2️⃣ Provision Infrastructure with Terraform
+All infrastructure is defined under the `terraform/` directory, with each core AWS service organised into its own **module** (`vpc/`, `alb/`, `ecs/`, `acm/`, `route53/`). This modular approach makes the code easy to extend, test, and maintain.
+
+- **VPC Module →** Creates a dedicated VPC with subnets, route tables, and an internet gateway to securely host the application
+- **ALB Module →** Provisions an Application Load Balancer with HTTPS termination using ACM. Traffic is routed only to healthy ECS tasks
+- **ECS Module →** Deploys the containerised Threat Composer application to Fargate, pulling the latest image from ECR and scaling on demand
+- **Route 53 Module →** Configures DNS to make the app available at a custom domain, routed securely through the ALB
+
+```yaml
+module "ecs" {
+  source                      = "./modules/ecs"
+  ecs_container_name          = var.ecs_container_name
+  vpc_id                      = module.vpc.vpc_id
+  ecs_service_desired_count   = var.ecs_service_desired_count
+  ecs_ingress_sg_ids          = [module.alb.lb_sg_id]
+  ...
+}
+```
+
+With a single `terraform apply`, the complete infrastructure — networking, security, compute, and DNS — is provisioned automatically, delivering a **secure and production-ready ECS environment**.
