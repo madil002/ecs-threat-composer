@@ -100,3 +100,23 @@ module "ecs" {
 ```
 
 With a single `terraform apply`, the complete infrastructure — networking, security, compute, and DNS — is provisioned automatically, delivering a **secure and production-ready ECS environment**.
+
+### 3️⃣ Terraform Plan & Security Scanning
+Before any infrastructure changes are applied, the **Terraform Plan workflow** provides a controlled and secure validation step. This ensures infrastructure changes are safe, compliant, and free from misconfigurations before deployment.
+
+- **Terraform Plan →** Runs `terraform init` and `terraform plan` to preview changes without applying them.
+- **Linting (TFLint) →** Catches syntax errors, unused variables, and configuration issues early.
+- **Policy Scanning (Checkov)** → Enforces security best practices (e.g., encrypted storage, least-privilege IAM roles, network restrictions).
+- **SARIF Reports →** Both TFLint and Checkov results are uploaded to GitHub’s Security tab for visibility and auditing.
+
+```yaml
+- name: Run TFLint
+  run: |
+    tflint --init
+    tflint --format sarif > tflint.sarif
+
+- name: Run Checkov
+  uses: bridgecrewio/checkov-action@v12
+```
+
+> 📌 **Key benefit:** Every infrastructure change is previewed, linted, and scanned for compliance before it ever reaches AWS, reducing security risks and catching issues early in the pipeline.
