@@ -36,29 +36,47 @@ The solution provisions a secure and scalable cloud environment, including **VPC
 ```
 
 ## ✨ Key Features
-### 📊 Threat Composer Application
+#### 📊 Threat Composer Application
 - **Amazon Threat Composer**: Deploys the open-source threat modeling tool in a containerised environment
 - **Browser-Based Access**: Accessible via HTTPS with a custom Route 53 domain
 - **Dockerised Deployment**: Application container built, pushed, and run on ECS Fargate
 - **Ready-to-Use Setup**: No manual installation — app is live after pipeline execution
 
-### 🚀 Infrastructure Automation
+#### 🚀 Infrastructure Automation
 - **Terraform Modules**: Modular design for VPC, ECS, ALB, Route 53, and ACM
 - **GitHub Actions Pipelines**: Automated workflows for Docker build/push, Terraform plan/apply/destroy
 - **ECR Integration**: Docker images built and pushed directly into Amazon ECR
 - **Scalable ECS Fargate**: Serverless compute with task definition and service management
 - **Automated DNS & SSL**: Route 53 records and ACM certificates provisioned automatically
 
-### 🔐 Security & Compliance
+#### 🔐 Security & Compliance
 - **ACM-Managed TLS**: Encrypted HTTPS connections via Application Load Balancer
 - **Network Isolation**: Security groups restrict access to only necessary traffic (ALB ↔ ECS)
 - **IAM Roles & Policies**: Fine grained AWS permissions for ECS tasks and pipelines
 - **Pre-Commit Hooks**: Enforces linting and formatting before committing changes
 - **Checkov Integration**: Infrastructure code scanning for misconfigurations
 
-### 📈 Monitoring & Reliability
+#### 📈 Monitoring & Reliability
 
 - **ALB Health Checks**: Continuous monitoring of ECS task health via load balancer
 - **ECS Service Insights**: Built in metrics for CPU, memory, and scaling behavior
 - **Centralised Logging**: ECS, ALB, and VPC logs available in CloudWatch
 - **High Availability**: Multi-AZ deployment with load-balanced traffic distribution
+#
+## ⚙️ How It Works
+### 1️⃣ Build & Push Docker Image
+The application container is built from the `app/` directory and managed via a GitHub Actions workflow (`docker-build-push.yaml`). When triggered manually, it:
+- Authenticates to Amazon ECR using **GitHub secrets**.
+- **Builds & tags** the Docker image (`ecs-threat-app:latest`).
+- **Scans vulnerabilities** with Trivy (CRITICAL/HIGH severities).
+- Publishes results to GitHub’s **Security** tab.
+- **Pushes** the image to Amazon ECR for ECS deployment.
+```yaml
+- name: Build the image
+  run: |
+    docker build -t ecs-threat-app ./app
+    docker tag ecs-threat-app:latest ${{ secrets.AWS_REPOSITORY }}/ecs-threat-app:latest
+
+- name: Run Trivy vulnerability scanner
+  uses: aquasecurity/trivy-action@0.28.0
+```
