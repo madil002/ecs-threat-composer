@@ -53,8 +53,10 @@ The solution provisions a secure and scalable cloud environment, including **VPC
 - **ACM-Managed TLS**: Encrypted HTTPS connections via Application Load Balancer
 - **Network Isolation**: Security groups restrict access to only necessary traffic (ALB ↔ ECS)
 - **IAM Roles & Policies**: Fine grained AWS permissions for ECS tasks and pipelines
-- **Pre-Commit Hooks**: Enforces linting and formatting before committing changes
-- **Checkov Integration**: Infrastructure code scanning for misconfigurations
+- **Code & Container Security**:
+  - **Pre-Commit Hooks & Linting →** Terraform code is automatically formatted and validated before any commit, catching syntax errors and misconfigurations early
+  - **Checkov →** Scans Terraform infrastructure for policy violations and security misconfigurations, ensuring compliance before deployment
+  - **Trivy →** Scans container images for critical and high-severity vulnerabilities before they are pushed to ECR, preventing insecure images from reaching production
 
 #### 📈 Monitoring & Reliability
 
@@ -120,3 +122,33 @@ Before any infrastructure changes are applied, the **Terraform Plan workflow** p
 ```
 
 > 📌 **Key benefit:** Every infrastructure change is previewed, linted, and scanned for compliance before it ever reaches AWS, reducing security risks and catching issues early in the pipeline.
+
+### 4️⃣ Terraform Apply & Destroy Pipelines
+After validating infrastructure changes in the Plan stage, the **Terraform Apply workflow** provisions or updates the full AWS stack — including VPC, ALB, ECS Fargate, ACM certificates, and Route 53 DNS. This workflow ensures that changes are applied consistently and safely across all environments.
+
+```yaml
+- name: Apply Terraform
+  run: terraform apply --auto-approve
+```
+
+The **Terraform Destroy** workflow allows you to safely tear down environments when they’re no longer needed, which is especially useful for development or testing to avoid unnecessary AWS costs:
+
+```yaml
+- name: Destroy Terraform
+  run: terraform destroy --auto-approve
+```
+
+### 🔹 Pre-Commit Hooks
+To maintain code quality and consistency, this project uses **pre-commit hooks** defined in `pre-commit-config.yaml`. These hooks automatically run checks before any commit is accepted, preventing formatting errors, enforcing standards, and catching syntax errors or misconfigurations early, keeping the repository clean and reliable.
+
+**Key Hooks:**
+- **Terraform** (`pre-commit-terraform`)
+  - **terraform_fmt** → Formats Terraform code
+  - **terraform_validate** → Checks Terraform files for syntax and configuration errors
+  - **terraform_tflint** → Detects potential misconfigurations or best-practice violations
+- **General Code Quality** (`pre-commit-hooks`)
+  - Removes trailing whitespace
+  - Fixes end-of-file newlines
+  - Normalises line endings to LF.
+- **YAML Linting** (`yamllint`)
+  - Ensures GitHub Actions workflows and other YAML files follow proper formatting and indentation.
